@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>中石油2026春季各公司分析及报考建议</title>
     <script>
         function loadScript(url, fallback) {
@@ -14,26 +15,150 @@
                    'https://cdn.bootcdn.net/ajax/libs/plotly.js/2.24.1/plotly.min.js');
     </script>
     <style>
-        body { font-family: 'Microsoft YaHei',sans-serif; background:#f5f7fa; margin:0; padding:20px; }
-        .header { text-align:center; margin-bottom:25px; }
-        .header h1 { color:#1e293b; font-size:30px; }
-        .controls { text-align:center; margin-bottom:20px; }
-        select { padding:10px 20px; font-size:16px; border-radius:8px; border:1px solid #ccc; }
-        .container { display:flex; gap:30px; max-width:1400px; margin:0 auto; }
-        .chart-panel { flex:3; background:white; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.06); padding:20px; }
-        .advice-panel { flex:2; background:white; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.06); padding:25px; line-height:1.8; color:#334155; max-height:600px; overflow-y:auto; }
-        .advice-panel h2 { color:#1e293b; border-bottom:2px solid #636EFA; padding-bottom:5px; margin-bottom:15px; }
-        .advice-panel pre { font-family:inherit; white-space:pre-wrap; margin:0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #2c3e50;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: white;
+        }
+        .header h1 {
+            font-size: 28px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: none;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            appearance: none;
+            outline: none;
+        }
+        .container {
+            display: flex;
+            gap: 25px;
+            flex-direction: column;
+        }
+        .top-row {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        .chart-panel, .advice-panel {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 20px;
+        }
+        .chart-panel {
+            flex: 3;
+            min-height: 400px;
+        }
+        .advice-panel {
+            flex: 2;
+            line-height: 1.8;
+            color: #334155;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .advice-panel h2 {
+            color: #1e293b;
+            border-bottom: 2px solid #636EFA;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .advice-panel pre {
+            font-family: inherit;
+            white-space: pre-wrap;
+            margin: 0;
+            font-size: 15px;
+        }
+        .pie-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .pie-container {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+        #pie-chart {
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            position: relative;
+        }
+        .rotating-ring {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            width: calc(100% + 30px);
+            height: calc(100% + 30px);
+            border-radius: 50%;
+            border: 6px solid transparent;
+            border-top-color: #f39c12;
+            border-right-color: #e74c3c;
+            border-bottom-color: #9b59b6;
+            border-left-color: #3498db;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+            animation: spin 4s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .top-row {
+                flex-direction: column;
+            }
+            .pie-container {
+                width: 300px;
+                height: 300px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header"><h1>🏗️ 中石油2026春季通过考试 · 专业分布与报考建议</h1></div>
     <div class="controls"><select id="company-select"></select></div>
     <div class="container">
-        <div class="chart-panel" id="chart"></div>
-        <div class="advice-panel">
-            <h2>📝 数据分析与报考小贴士</h2>
-            <pre id="advice-text"></pre>
+        <div class="top-row">
+            <div class="chart-panel" id="chart"></div>
+            <div class="advice-panel">
+                <h2>📝 数据分析与报考小贴士</h2>
+                <pre id="advice-text"></pre>
+            </div>
+        </div>
+        <div class="pie-wrapper">
+            <div class="pie-container">
+                <div class="rotating-ring"></div>
+                <div id="pie-chart"></div>
+            </div>
         </div>
     </div>
     <script>
@@ -63,25 +188,51 @@
             var d = allData[comp];
             if (!d || d['专业'].length === 0) {
                 Plotly.purge('chart');
+                Plotly.purge('pie-chart');
                 document.getElementById('advice-text').innerText = d ? d['建议'] : '暂无数据';
                 return;
             }
-            // 注意：数据已经是降序排列，Plotly 水平条形图默认从下往上画，为让人数多的在顶部，我们需要反转y轴数组？
-            // 实际上，Plotly 的 y 数组第一个元素对应最上方，所以直接使用降序排列的数组即可。
+
+            // 更新条形图
             var colors = d['专业'].map(function(m) { return colorMap[m] || '#636EFA'; });
-            var trace = {
+            var barTrace = {
                 y: d['专业'], x: d['人数'], type: 'bar', orientation: 'h',
                 marker: {color: colors}, text: d['人数'], textposition: 'outside'
             };
-            var layout = {
+            var barLayout = {
                 title: comp + ' - 专业通过人数（Top 15）',
                 xaxis: {title: '通过人数'},
                 height: Math.min(800, d['专业'].length * 30 + 150),
                 margin: {l:250, r:40, t:60, b:40},
                 template: 'plotly_white',
-                yaxis: { autorange: 'reversed' }  // 确保第一个元素在顶部
+                yaxis: { autorange: 'reversed' }
             };
-            Plotly.newPlot('chart', [trace], layout, {responsive: true});
+            Plotly.newPlot('chart', [barTrace], barLayout, {responsive: true});
+
+            // 更新饼图（甜甜圈样式，显示名称和百分比）
+            var pieColors = d['专业'].map(function(m) { return colorMap[m] || '#636EFA'; });
+            var pieTrace = {
+                labels: d['专业'],
+                values: d['人数'],
+                type: 'pie',
+                hole: 0.45,
+                marker: {colors: pieColors},
+                textinfo: 'label+percent',
+                textposition: 'outside',
+                insidetextorientation: 'radial'
+            };
+            var pieLayout = {
+                title: comp + ' - 专业占比',
+                showlegend: false,
+                height: 420,
+                margin: {l:20, r:20, t:60, b:20},
+                template: 'plotly_white',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)'
+            };
+            Plotly.newPlot('pie-chart', [pieTrace], pieLayout, {responsive: true});
+
+            // 更新建议文字
             document.getElementById('advice-text').innerText = d['建议'];
         }
     </script>
